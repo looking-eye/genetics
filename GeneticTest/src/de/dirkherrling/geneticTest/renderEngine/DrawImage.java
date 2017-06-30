@@ -48,20 +48,25 @@ public class DrawImage extends Thread {
 //		System.out.println(Main.getProperties().getProperty("drawLargeCirclesFirst"));
 		if (!Boolean.parseBoolean(Main.getProperties().getProperty("drawLargeCirclesFirst"))) {
 //			System.out.println("not drawlargecirclesfirst");
-			for(Circle c : g.getCircles()) {
-				ig2.setColor(new Color(c.getR(), c.getG(), c.getB()));
-				ig2.fillOval(c.getX()-(c.getDiameter()/2), c.getY()-(c.getDiameter()/2), c.getDiameter(), c.getDiameter());
+			synchronized (g.getCircles()) {
+				for(Circle c : g.getCircles()) {
+					ig2.setColor(new Color(c.getR(), c.getG(), c.getB()));
+					ig2.fillOval(c.getX()-(c.getDiameter()/2), c.getY()-(c.getDiameter()/2), c.getDiameter(), c.getDiameter());
+				}
 			}
 		} else {
 			//sort by diameter
 //			System.out.println("drawlargecirclesfirst");
 			for (int i = Integer.valueOf(Main.getProperties().getProperty("maxDiameter"))+1; i >= 0; i--) {
-				for (Circle c : g.getCircles()) {
-					if (c.getDiameter() == i) {
-						ig2.setColor(new Color(c.getR(), c.getG(), c.getB()));
-						ig2.fillOval(c.getX()-(c.getDiameter()/2), c.getY()-(c.getDiameter()/2), c.getDiameter(), c.getDiameter());
+				synchronized (g.getCircles()) {
+					for (Circle c : g.getCircles()) {
+						if (c.getDiameter() == i) {
+							ig2.setColor(new Color(c.getR(), c.getG(), c.getB()));
+							ig2.fillOval(c.getX()-(c.getDiameter()/2), c.getY()-(c.getDiameter()/2), c.getDiameter(), c.getDiameter());
+						}
 					}
 				}
+				
 			}
 		}
 		
