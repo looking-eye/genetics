@@ -167,7 +167,7 @@ public class Main {
 			
 			//mutate
 			for(Genome g : this.population.getGenomes()) {
-				Mutation.mutate(g);
+				Mutation.mutate(g, i);
 			}
 			
 			//cross

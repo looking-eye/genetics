@@ -16,8 +16,9 @@ public class Mutation {
 	private static double duplicateFeatureProbability = Double.valueOf(Main.getProperties().getProperty("duplicateFeatureProbability"));
 	private static double duplicateFeatureFraction = Double.valueOf(Main.getProperties().getProperty("duplicateFeatureFraction"));
 	private static int maxDiameter = Integer.valueOf(Main.getProperties().getProperty("maxDiameter"));
+	private static int duplicateFeatureGenerationFraction = Integer.valueOf(Main.getProperties().getProperty("duplicateFeatureGenerationFraction"));
 	
-	public static void mutate(Genome g) {
+	public static void mutate(Genome g, int generation) {
 		for (Circle c : g.getCircles()) {
 			c.setR(newRGBint(c.getR()));
 			c.setG(newRGBint(c.getG()));
@@ -45,7 +46,7 @@ public class Mutation {
 //				c.setDiameter(newDiameter);
 			}
 		}
-		if (duplicateFeatures) {
+		if (duplicateFeatures && (generation%duplicateFeatureGenerationFraction == 0)) {
 			int numberOfFeaturesToConsiderForDuplication = (int) Math.floor((double)(g.getCircles().size()) * duplicateFeatureFraction);
 			int circleCount = 0;
 			int removeCircleCount = 0;
