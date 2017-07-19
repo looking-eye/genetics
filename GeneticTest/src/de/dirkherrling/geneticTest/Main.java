@@ -114,8 +114,10 @@ public class Main {
 		}
 		GUI gui = null;
 		if (!headless) {
-			gui = new GUI(prototypeImage);
-			gui.setCandidateImage(winner.getPhenoType());
+			gui = new GUI(prototypeImage, this);
+			if (!Boolean.valueOf(properties.getProperty("drawAllPhenotypes"))) {
+				gui.setCandidateImage(winner.getPhenoType());
+			}
 		}
 		new File(pathToImageStore).mkdirs();
 		properties.store(new FileOutputStream(new File(pathToImageStore + "/config.properties")), "Properties stored for reproduction");
@@ -129,9 +131,18 @@ public class Main {
 			i++;
 			//sort
 			this.population.setGenomes(Util.sortByFitness(this.population.getGenomes()));
+			BufferedImage allImages = null;
+			if (Boolean.valueOf(properties.getProperty("drawAllPhenotypes"))
+					|| Boolean.valueOf(properties.getProperty("outputAllPhenotypes"))) {
+				allImages = gui.combineAllPhenotypes();
+			}
 			//display winner
 			if (!headless) {
-				gui.setCandidateImage(this.population.getGenomes().get(0).getPhenoType());
+				if (!Boolean.valueOf(properties.getProperty("drawAllPhenotypes"))) {
+					gui.setCandidateImage(this.population.getGenomes().get(0).getPhenoType());
+				} else {
+					gui.setPrototypeImage(allImages);
+				}
 			}
 //			if (!new File(Main.getPathToImageStore() + String.valueOf(this.population.getGenomes().get(0).getFitness()) + ".png").exists()) {
 			if (this.population.getGenomes().get(0).getFitness() < lastFitness) {
@@ -139,6 +150,10 @@ public class Main {
 				Main.imageNumber++;
 				DrawImage.saveImage(this.population.getGenomes().get(0).getPhenoType(), 
 						 fileName + ".png");
+				if (Boolean.valueOf(properties.getProperty("outputAllPhenotypes"))) {
+					DrawImage.saveImage(allImages, 
+							 "combined_" + fileName + ".png");
+				}
 				DrawImage.saveImage(this.population.getGenomes().get(0).getPhenoType(), 
 					 "winner.png");
 				if (Boolean.valueOf(properties.getProperty("saveWinningGenome"))) {
@@ -181,7 +196,6 @@ public class Main {
 			this.population.setGenomes(newGenomes);
 			
 			//add best three, remove worst
-//			System.out.println(this.population.getGenomes().size());
 			if (Boolean.valueOf(properties.getProperty("removeWorst"))) {
 				this.population.getGenomes().remove(this.population.getGenomes().size()-1);
 				this.population.getGenomes().remove(this.population.getGenomes().size()-1);
@@ -191,7 +205,6 @@ public class Main {
 				this.population.getGenomes().remove(this.population.getGenomes().size()/2);
 				this.population.getGenomes().remove(this.population.getGenomes().size()/2);
 			}
-//			System.out.println(this.population.getGenomes().size());
 
 			this.population.getGenomes().add(0, best.get(2));
 			this.population.getGenomes().add(0, best.get(1));
@@ -200,7 +213,6 @@ public class Main {
 			//genotype => phenotype
 			//fitness
 			for (Genome g : this.population.getGenomes()) {
-//				System.out.println("Threadcount: " + runningThreadCount);
 				while (runningThreadCount >= Integer.valueOf(properties.getProperty("threadCount"))) {
 					try {
 						Thread.sleep(5);
@@ -210,20 +222,8 @@ public class Main {
 					}
 				}
 				new DrawImage(width, height, g).start();
-//				new Fitness(g).start();
 			}
-//			for (Genome g : this.population.getGenomes()) {
-////				Fitness.getFitnessValue(g);
-//				while (runningThreadCount >= Integer.valueOf(properties.getProperty("threadCount"))) {
-//					try {
-//						Thread.sleep(100);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//						break;
-//					}
-//				}
-//				
-//			}
+
 			//wait for all Threads to finish
 			while (runningThreadCount != 0) {
 				try {
@@ -301,6 +301,10 @@ public class Main {
 
 	public static int[][] getPhenoBs() {
 		return phenoBs;
+	}
+
+	public Population getPopulation() {
+		return population;
 	}
 
 //	public static Color[][] getPhenotypeColors() {
