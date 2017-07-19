@@ -5,8 +5,10 @@ The population for this algorithm consists of a (configurable) number of individ
 
 After every generation the three(?) best individuals are cloned into the next generation. The rest of the population is filled with crossovers between random parents. You can either choose to kill the three average individuals, or the worst three (removeWorst=true), to account for the three best that were cloned. (Otherwise, your population would grow).
 
-The number of circles per genome are calculated, based on the input picture: x * y / fractionCircleCount. You should balance this with your maxDiameter for your circles.
+The number of circles per genome are calculated, based on the input picture: x * y / fractionCircleCount. You should balance this with your maxDiameter for your circles. Less circles will evolve faster to better results, but will be unable to form fine details.
 
+# Download
+You can obviously find the complete source in this github repository. However, if you are only interested in the executable jar file, you can find it here: https://github.com/looking-eye/genetics/blob/master/GeneticTest/release/genetics.jar
 
 # Startup
     java -jar genetics.jar yourPrototypePic.png
