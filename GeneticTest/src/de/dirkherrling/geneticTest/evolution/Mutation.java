@@ -24,6 +24,7 @@ public class Mutation {
 	private static int maxChangeColorDefault = maxChangeColor;
 	private static int maxChangePositionDefault = maxChangePosition;
 	private static int maxChangeDiameterDefault = maxChangeDiameter;
+	private static double mutationProbabilityDefault = mutationProbability;
 	
 	public static void mutate(Genome g, int generation) {
 		for (Circle c : g.getCircles()) {
@@ -36,7 +37,7 @@ public class Mutation {
 			}
 			int newDiameter = c.getDiameter();
 			if (dynamicMutationProbability) {
-				mutationProbability = Math.max(1.0d / Double.valueOf(Main.getDeltaG()), 0.01);
+				mutationProbability = Math.max(1.0d / Double.valueOf(Main.getDeltaG()), mutationProbabilityDefault);
 			}
 			if (dynamicMutationSteps) {
 				maxChangeDiameter = (int)Math.round(Math.max(1.0, Math.floor(Double.valueOf(maxChangeDiameterDefault) / Double.valueOf(Main.getDeltaG()))));
