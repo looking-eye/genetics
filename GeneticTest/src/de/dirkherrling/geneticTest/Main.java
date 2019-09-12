@@ -45,6 +45,8 @@ public class Main {
 	private static int[][] phenoGs;
 	private static int[][] phenoBs;
 	private static int imageNumber = 0;
+	private static int generationOfLastImprovement = 1;
+	private static int deltaG = 1;
 	
 	public Main() throws IOException {
 		try {
@@ -125,7 +127,7 @@ public class Main {
 		long start = System.currentTimeMillis();
 		long stop = System.currentTimeMillis();
 		int i = 0;
-		int generationOfLastImprovement = 1;
+		generationOfLastImprovement = 1;
 		long lastFitness = winner.getFitness();
 		while (i != Integer.valueOf(properties.getProperty("generationCount"))) {
 			i++;
@@ -173,6 +175,7 @@ public class Main {
 				lastFitness = this.population.getGenomes().get(0).getFitness();
 				generationOfLastImprovement = i;
 			}
+			deltaG = Math.max(1, i - generationOfLastImprovement);
 			start = System.currentTimeMillis();
 			//duplicate best
 			Vector<Genome> best = new Vector<>();
@@ -305,6 +308,10 @@ public class Main {
 
 	public Population getPopulation() {
 		return population;
+	}
+
+	public static int getDeltaG() {
+		return deltaG;
 	}
 
 //	public static Color[][] getPhenotypeColors() {
