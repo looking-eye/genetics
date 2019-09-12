@@ -17,12 +17,17 @@ public class Mutation {
 	private static double duplicateFeatureFraction = Double.valueOf(Main.getProperties().getProperty("duplicateFeatureFraction"));
 	private static int maxDiameter = Integer.valueOf(Main.getProperties().getProperty("maxDiameter"));
 	private static int duplicateFeatureGenerationFraction = Integer.valueOf(Main.getProperties().getProperty("duplicateFeatureGenerationFraction"));
+	private static boolean directedMutation = Boolean.valueOf(Main.getProperties().getProperty("directedMutation"));
 	
 	public static void mutate(Genome g, int generation) {
 		for (Circle c : g.getCircles()) {
-			c.setR(newRGBint(c.getR()));
-			c.setG(newRGBint(c.getG()));
-			c.setB(newRGBint(c.getB()));
+			if (directedMutation) {
+				c = newCircleColor(c);
+			} else {
+				c.setR(newRGBint(c.getR()));
+				c.setG(newRGBint(c.getG()));
+				c.setB(newRGBint(c.getB()));
+			}
 			int newDiameter = c.getDiameter();
 			if (Circle.getRand().nextDouble() < mutationProbability) {
 				newDiameter = (int) Math.floor(newDiameter+(maxChangeDiameter * (Circle.getRand().nextDouble()-0.5)*2.0 ));
@@ -41,7 +46,7 @@ public class Mutation {
 			if (Circle.getRand().nextDouble() < mutationProbability) {
 				newY = (int) Math.floor(newY+(maxChangePosition * (Circle.getRand().nextDouble()-0.5)*2.0 ));
 				newY = Math.max(newY, 0);
-				newY = Math.min(newY, Main.getWidth()-1);
+				newY = Math.min(newY, Main.getHeight()-1);
 				c.setY(newY);
 //				c.setDiameter(newDiameter);
 			}
@@ -78,6 +83,36 @@ public class Mutation {
 			}
 		}
 		
+	}
+	
+	private static Circle newCircleColor(Circle c) {
+		if (Circle.getRand().nextDouble() < mutationProbability) {
+//			Color centerColor = new Color();
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			if (Main.getPhenoRs()[c.getX()][c.getY()] <= c.getR()) {
+				r = Math.max(0, Math.min(c.getR() - Circle.getRand().nextInt(maxChangeColor), 255));
+			} else {
+				r = Math.max(0, Math.min(c.getR() + Circle.getRand().nextInt(maxChangeColor), 255));
+			}
+			if (Main.getPhenoGs()[c.getX()][c.getY()] <= c.getG()) {
+				g = Math.max(0, Math.min(c.getG() - Circle.getRand().nextInt(maxChangeColor), 255));
+			} else {
+				g = Math.max(0, Math.min(c.getG() + Circle.getRand().nextInt(maxChangeColor), 255));
+			}
+			if (Main.getPhenoBs()[c.getX()][c.getY()] <= c.getB()) {
+				b = Math.max(0, Math.min(c.getB() - Circle.getRand().nextInt(maxChangeColor), 255));
+			} else {
+				b = Math.max(0, Math.min(c.getB() + Circle.getRand().nextInt(maxChangeColor), 255));
+			}
+			c.setR(r);
+			c.setG(g);
+			c.setB(b);
+			return c;
+		} else {
+			return c;
+		}
 	}
 	
 	private static int newRGBint(int color) {
