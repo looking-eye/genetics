@@ -20,6 +20,7 @@ public class Mutation {
 	private static boolean directedMutation = Boolean.valueOf(Main.getProperties().getProperty("directedMutation"));
 	private static boolean dynamicMutationProbability = Boolean.valueOf(Main.getProperties().getProperty("dynamicMutationProbability"));
 	private static boolean dynamicMutationSteps = Boolean.valueOf(Main.getProperties().getProperty("dynamicMutationSteps"));
+	private static boolean optimizeBlackAndWhiteFirst = Boolean.valueOf(Main.getProperties().getProperty("optimizeBlackAndWhiteFirst"));
 	
 	private static int maxChangeColorDefault = maxChangeColor;
 	private static int maxChangePositionDefault = maxChangePosition;
@@ -35,15 +36,15 @@ public class Mutation {
 				c.setG(newRGBint(c.getG()));
 				c.setB(newRGBint(c.getB()));
 			}
-			int newDiameter = c.getDiameter();
 			if (dynamicMutationProbability) {
 				mutationProbability = Math.max(1.0d / Double.valueOf(Main.getDeltaG()), mutationProbabilityDefault);
 			}
 			if (dynamicMutationSteps) {
-				maxChangeDiameter = (int)Math.round(Math.max(1.0, Math.floor(Double.valueOf(maxChangeDiameterDefault) / Double.valueOf(Main.getDeltaG()))));
+				maxChangeDiameter = (int)Math.round(Math.max(2.0, Math.floor(Double.valueOf(maxChangeDiameterDefault) / Double.valueOf(Main.getDeltaG()))));
 //				System.out.println(maxChangeDiameter);
-				maxChangePosition = (int)Math.round(Math.max(1.0, Math.floor(Double.valueOf(maxChangePositionDefault) / Double.valueOf(Main.getDeltaG()))));
+				maxChangePosition = (int)Math.round(Math.max(2.0, Math.floor(Double.valueOf(maxChangePositionDefault) / Double.valueOf(Main.getDeltaG()))));
 			}
+			int newDiameter = c.getDiameter();
 			if (Circle.getRand().nextDouble() < mutationProbability) {
 				newDiameter = (int) Math.floor(newDiameter+(maxChangeDiameter * (Circle.getRand().nextDouble()-0.5)*2.0 ));
 				newDiameter = Math.max(newDiameter, 1);
@@ -52,18 +53,17 @@ public class Mutation {
 			}
 			int newX = c.getX();
 			if (Circle.getRand().nextDouble() < mutationProbability) {
-				newX = (int) Math.floor(newX+(maxChangePosition * (Circle.getRand().nextDouble()-0.5)*2.0 ));
+				newX = (int) Math.round(newX+(maxChangePosition * (Circle.getRand().nextDouble()-0.5)*2.0 ));
 				newX = Math.max(newX, 0);
 				newX = Math.min(newX, Main.getWidth()-1);
 				c.setX(newX);
 			}
 			int newY = c.getY();
 			if (Circle.getRand().nextDouble() < mutationProbability) {
-				newY = (int) Math.floor(newY+(maxChangePosition * (Circle.getRand().nextDouble()-0.5)*2.0 ));
+				newY = (int) Math.round(newY+(maxChangePosition * (Circle.getRand().nextDouble()-0.5)*2.0 ));
 				newY = Math.max(newY, 0);
 				newY = Math.min(newY, Main.getHeight()-1);
 				c.setY(newY);
-//				c.setDiameter(newDiameter);
 			}
 		}
 		if (duplicateFeatures && (generation%duplicateFeatureGenerationFraction == 0)) {
@@ -107,9 +107,10 @@ public class Mutation {
 			int g = 0;
 			int b = 0;
 			if (dynamicMutationSteps) {
-				maxChangeColor = (int)Math.round(Math.max(1.0, Math.floor(Double.valueOf(maxChangeColorDefault) / Double.valueOf(Main.getDeltaG()))));
+				maxChangeColor = (int)Math.round(Math.max(2.0, Math.floor(Double.valueOf(maxChangeColorDefault) / Double.valueOf(Main.getDeltaG()))));
 			}
-			if (dynamicMutationSteps && Main.getDeltaG() > 100) {
+//			System.out.println(maxChangeColor);
+			if (dynamicMutationSteps && Main.getDeltaG() % 10 == 0) {
 				if (Circle.getRand().nextBoolean()) {
 					r = Math.max(0, Math.min(c.getR() - Circle.getRand().nextInt(maxChangeColor), 255));
 				} else {
@@ -125,23 +126,58 @@ public class Mutation {
 				} else {
 					b = Math.max(0, Math.min(c.getB() + Circle.getRand().nextInt(maxChangeColor), 255));
 				}
+			} else if (optimizeBlackAndWhiteFirst && Main.getGeneration() < 100) {
+				int x = c.getX() + Circle.getRand().nextInt(c.getDiameter()) - c.getDiameter()/2;
+				x = Math.max(0, x);
+				x = Math.min(x, Main.getWidth()-1);
+				int y = c.getY() + Circle.getRand().nextInt(c.getDiameter()) - c.getDiameter()/2;
+				y = Math.max(0, y);
+				y = Math.min(y, Main.getHeight()-1);
+				int grey = (Main.getPhenoRs()[x][y] + Main.getPhenoGs()[x][y] + Main.getPhenoBs()[x][y]) / 3;
+				c.setR((c.getR() + c.getB() + c.getG()) / 3);
+				if (grey < c.getR()) {
+					r = Math.max(0, Math.min(c.getR() - Circle.getRand().nextInt(maxChangeColor), 255));
+				} else if (grey > c.getR()) {
+					r = Math.max(0, Math.min(c.getR() + Circle.getRand().nextInt(maxChangeColor), 255));
+				}
+//				if (Main.getPhenoGs()[x][y] < c.getG()) {
+//					g = Math.max(0, Math.min(c.getG() - Circle.getRand().nextInt(maxChangeColor), 255));
+//				} else if (Main.getPhenoGs()[x][y] > c.getG()) {
+//					g = Math.max(0, Math.min(c.getG() + Circle.getRand().nextInt(maxChangeColor), 255));
+//				}
+//				if (Main.getPhenoBs()[x][y] < c.getB()) {
+//					b = Math.max(0, Math.min(c.getB() - Circle.getRand().nextInt(maxChangeColor), 255));
+//				} else if (Main.getPhenoBs()[x][y] > c.getB()) {
+//					b = Math.max(0, Math.min(c.getB() + Circle.getRand().nextInt(maxChangeColor), 255));
+//				}
+				g = r;
+				b = r;
 			} else {
-				if (Main.getPhenoRs()[c.getX()][c.getY()] <= c.getR()) {
+				int x = c.getX() + Circle.getRand().nextInt(c.getDiameter()) - c.getDiameter()/2;
+				x = Math.max(0, x);
+				x = Math.min(x, Main.getWidth()-1);
+				int y = c.getY() + Circle.getRand().nextInt(c.getDiameter()) - c.getDiameter()/2;
+				y = Math.max(0, y);
+				y = Math.min(y, Main.getHeight()-1);
+				if (Main.getPhenoRs()[x][y] < c.getR()) {
 					r = Math.max(0, Math.min(c.getR() - Circle.getRand().nextInt(maxChangeColor), 255));
-				} else {
+				} else if (Main.getPhenoRs()[x][y] > c.getR()) {
 					r = Math.max(0, Math.min(c.getR() + Circle.getRand().nextInt(maxChangeColor), 255));
 				}
-				if (Main.getPhenoGs()[c.getX()][c.getY()] <= c.getG()) {
+				if (Main.getPhenoGs()[x][y] < c.getG()) {
 					g = Math.max(0, Math.min(c.getG() - Circle.getRand().nextInt(maxChangeColor), 255));
-				} else {
+				} else if (Main.getPhenoGs()[x][y] > c.getG()) {
 					g = Math.max(0, Math.min(c.getG() + Circle.getRand().nextInt(maxChangeColor), 255));
 				}
-				if (Main.getPhenoBs()[c.getX()][c.getY()] <= c.getB()) {
+				if (Main.getPhenoBs()[x][y] < c.getB()) {
 					b = Math.max(0, Math.min(c.getB() - Circle.getRand().nextInt(maxChangeColor), 255));
-				} else {
+				} else if (Main.getPhenoBs()[x][y] > c.getB()) {
 					b = Math.max(0, Math.min(c.getB() + Circle.getRand().nextInt(maxChangeColor), 255));
 				}
 			}
+//			if (r != c.getR() || g != c.getG() || b != c.getB()) {
+//				System.out.println("color changed");
+//			}
 			c.setR(r);
 			c.setG(g);
 			c.setB(b);

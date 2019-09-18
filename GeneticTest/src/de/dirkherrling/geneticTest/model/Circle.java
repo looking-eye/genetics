@@ -30,7 +30,8 @@ public class Circle implements Serializable {
 		this.x = rand.nextInt(maxX);
 		this.y = rand.nextInt(maxY);
 //		this.diameter = rand.nextInt(Math.max(maxX, maxY) / 5);
-		this.diameter = rand.nextInt(Integer.valueOf(Main.getProperties().getProperty("maxDiameter")));
+//		this.diameter = Math.max(rand.nextInt(Integer.valueOf(Main.getProperties().getProperty("maxDiameter"))), 1);
+		this.diameter = Integer.valueOf(Main.getProperties().getProperty("maxDiameter")) / 20;
 		this.r = rand.nextInt(255);
 		this.g = rand.nextInt(255);
 		this.b = rand.nextInt(255);

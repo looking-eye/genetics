@@ -47,6 +47,7 @@ public class Main {
 	private static int imageNumber = 0;
 	private static int generationOfLastImprovement = 1;
 	private static int deltaG = 1;
+	private static int generation = 1;
 	
 	public Main() throws IOException {
 		try {
@@ -131,6 +132,7 @@ public class Main {
 		long lastFitness = winner.getFitness();
 		while (i != Integer.valueOf(properties.getProperty("generationCount"))) {
 			i++;
+			generation = i;
 			//sort
 			this.population.setGenomes(Util.sortByFitness(this.population.getGenomes()));
 			BufferedImage allImages = null;
@@ -312,6 +314,10 @@ public class Main {
 
 	public static int getDeltaG() {
 		return deltaG;
+	}
+
+	public static int getGeneration() {
+		return generation;
 	}
 
 //	public static Color[][] getPhenotypeColors() {
